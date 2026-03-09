@@ -1,0 +1,53 @@
+{
+  // Tailscale settings
+  "hostname": "mobile-exit-proxy",
+  "authkey": "", // or set TS_AUTHKEY env var
+  "state_dir": "", // default: ~/.mobile-exit-proxy
+
+  // Upstream proxy backends (Burp Suite instances)
+  // Supports multiple backends with automatic health checking & failover
+  "proxies": [
+    {
+      "addr": "127.0.0.1:8083",
+      "alias": "burpsuite-main",
+      "username": "", // optional proxy auth
+      "password": "",
+      "health_check": true
+    }
+    // Add more backends for failover:
+    // {
+    //   "addr": "127.0.0.1:8084",
+    //   "alias": "burpsuite-backup",
+    //   "health_check": true
+    // }
+  ],
+
+  // DNS upstream servers
+  "dns": ["8.8.8.8:53", "1.1.1.1:53"],
+
+  // Performance tuning
+  "dial_timeout": "10s",
+  "buffer_size": 32768, // 32KB — increase to 65536 for high-throughput
+  "max_idle_time": "5m",
+  "health_interval": "30s",
+
+  // Passthrough: domains that bypass Burp and connect directly.
+  // Use for apps with SSL certificate pinning that break through Burp.
+  // Exact match: "api.example.com" — only that hostname.
+  // Suffix match: ".example.com" — matches sub.example.com, api.example.com, etc.
+  // Wildcard: "*" — passthrough everything (useful with intercept_only).
+  // Passthrough: 2 domain SSL-pinned bypass Burp, tất cả còn lại đi qua Burp
+  "passthrough": [
+    // Google push messaging (binary protocol, not HTTP — Burp can't parse)
+    "mtalk.google.com",
+    // AppsFlyer SDK analytics (not useful for pentesting)
+    ".appsflyersdk.com"
+  ],
+  
+  "intercept_only": [],
+
+  // Web control panel (accessible via tailnet)
+  "web_listen": ":8080",
+
+  "verbose": false
+}
